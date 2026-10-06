@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayCloud - Portal de Pagamentos</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e1e7fe',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        },
+                        paycloud: {
+                            purple: '#6d28d9',
+                            violet: '#7c3aed',
+                            blue: '#2563eb',
+                            cyan: '#38bdf8',
+                            dark: '#0f172a',
+                            lightBg: '#f8fafc',
+                            cardBg: '#ffffff'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f6f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased h-screen overflow-hidden flex flex-col">
+
+    <div class="flex h-full overflow-hidden">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 transition-all duration-300 z-30">
+            <!-- Brand Header -->
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-700 via-violet-600 to-blue-500 flex items-center justify-center text-white shadow-md shadow-purple-500/20">
+                        <i class="fa-solid font-bold text-lg fa-cloud"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-extrabold text-xl tracking-tight text-slate-900 leading-none flex items-center gap-1">
+                            Pay<span class="text-purple-600">Cloud</span>
+                        </h1>
+                        <span class="text-[10px] uppercase tracking-wider font-semibold text-slate-400 block mt-0.5">Portal de Pagamentos</span>
+                    </div>
+                </div>
+                <button id="closeMobileSidebar" class="md:hidden text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Sidebar Scrollable Body -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-6">
+                
+                <!-- Organization Dropdowns -->
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Organização:</label>
+                        <div class="relative">
+                            <select id="orgSelect" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 appearance-none focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 cursor-pointer transition">
+                                <option value="LINKEDPAY" selected>LINKEDPAY</option>
+                                <option value="MULTIPAY_AO">MULTIPAY ANGOLA</option>
+                                <option value="GLOBALPAY">GLOBAL PAYMENTS</option>
+                            </select>
+                            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Entidade:</label>
+                        <div class="relative">
+                            <select id="entitySelect" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 appearance-none focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 cursor-pointer transition">
+                                <option value="REF_1148" selected>REF 1148</option>
+                                <option value="REF_2090">REF 2090</option>
+                                <option value="REF_5510">REF 5510</option>
+                            </select>
+                            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-slate-100">
+
+                <!-- MAIN MENU SECTION -->
+                <nav class="space-y-1">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition text-purple-700 bg-purple-50 border-l-4 border-purple-600">
+                        <i class="fa-solid fa-chart-line text-sm w-5 text-center"></i>
+                        <span>Dashboard</span>
+                    </button>
+                    <button onclick="switchTab('referencias')" id="nav-referencias" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition border-l-4 border-transparent">
+                        <i class="fa-solid fa-tags text-sm w-5 text-center text-slate-400"></i>
+                        <span>Referências</span>
+                    </button>
+                    <button onclick="switchTab('pagamentos')" id="nav-pagamentos" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition border-l-4 border-transparent">
+                        <i class="fa-regular fa-credit-card text-sm w-5 text-center text-slate-400"></i>
+                        <span>Pagamentos</span>
+                    </button>
+                    <button onclick="switchTab('periodos')" id="nav-periodos" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition border-l-4 border-transparent">
+                        <i class="fa-solid fa-calculator text-sm w-5 text-center text-slate-400"></i>
+                        <span>Períodos</span>
+                    </button>
+                </nav>
+
+                <!-- ORGANIZATION MENU SECTION -->
+                <div class="pt-2">
+                    <span class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Organização</span>
+                    <nav class="space-y-1">
+                        <button onclick="switchTab('facturas')" id="nav-facturas" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition border-l-4 border-transparent">
+                            <i class="fa-regular fa-file-lines text-sm w-5 text-center text-slate-400"></i>
+                            <span>Facturas</span>
+                        </button>
+                        <button onclick="switchTab('utilizadores')" id="nav-utilizadores" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition border-l-4 border-transparent">
+                            <i class="fa-solid fa-users text-sm w-5 text-center text-slate-400"></i>
+                            <span>Utilizadores</span>
+                        </button>
+                        <button onclick="switchTab('funcoes')" id="nav-funcoes" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition border-l-4 border-transparent">
+                            <i class="fa-solid fa-key text-sm w-5 text-center text-slate-400"></i>
+                            <span>Funções</span>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Footer Quick Status -->
+            <div class="p-3 bg-slate-50 border-t border-slate-100 m-3 rounded-xl flex items-center gap-3">
+                <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                <div class="text-[11px]">
+                    <p class="font-semibold text-slate-700">Gateway Ativo</p>
+                    <p class="text-slate-400 text-[10px]">Multicaixa Express OK</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTAINER -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            
+            <!-- TOP HEADER BAR -->
+            <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 z-20 flex-shrink-0">
+                <div class="flex items-center gap-4">
+                    <button id="openMobileSidebar" class="md:hidden text-slate-600 hover:text-slate-900 focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                    <h2 id="pageTitle" class="text-xl font-bold text-slate-800 tracking-tight">Dashboard</h2>
+                </div>
+
+                <!-- Right Header Tools -->
+                <div class="flex items-center gap-5">
+                    <!-- Global Search Input -->
+                    <div class="hidden sm:flex items-center relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 text-slate-400 text-xs"></i>
+                        <input type="text" placeholder="Pesquisar referências, transações..." class="bg-slate-100 hover:bg-slate-100/80 focus:bg-white border border-transparent focus:border-purple-300 rounded-full pl-9 pr-4 py-1.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500/20 w-64 transition">
+                    </div>
+
+                    <!-- Notification Button with Badge -->
+                    <div class="relative">
+                        <button id="notificationBtn" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition relative">
+                            <i class="fa-regular fa-bell text-sm"></i>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border-2 border-white">1</span>
+                        </button>
+                        <!-- Notification Popover (Hidden by default) -->
+                        <div id="notificationMenu" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
+                            <div class="px-4 py-2 border-b border-slate-100 flex justify-between items-center">
+                                <span class="font-semibold text-xs text-slate-800">Notificações</span>
+                                <span class="text-[10px] font-medium text-purple-600 hover:underline cursor-pointer">Marcar como lidas</span>
+                            </div>
+                            <div class="divide-y divide-slate-50 text-xs">
+                                <a href="#" class="block p-3 hover:bg-slate-50 transition">
+                                    <p class="font-semibold text-slate-700">Relatório de Compensação</p>
+                                    <p class="text-slate-500 text-[11px] mt-0.5">O ciclo de compensação 8706 foi processado com sucesso.</p>
+                                    <span class="text-[10px] text-slate-400 mt-1 block">Há 15 minutos</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Profile Dropdown -->
+                    <div class="relative">
+                        <button id="userMenuBtn" class="flex items-center gap-3 focus:outline-none group">
+                            <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-800 to-indigo-600 text-white flex items-center justify-center font-bold text-xs ring-2 ring-purple-500/20 group-hover:ring-purple-500/40 transition">
+                                <i class="fa-solid fa-user-astronaut"></i>
+                            </div>
+                            <div class="hidden lg:block text-left">
+                                <span class="block text-xs font-semibold text-slate-700 group-hover:text-slate-900 transition">Mauro Quartin</span>
+                                <span class="block text-[10px] text-slate-400 truncate max-w-[180px]">mauro.quartin@linkedpay.co.ao</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-down text-slate-400 text-xs hidden lg:block"></i>
+                        </button>
+
+                        <!-- User Menu Modal/Dropdown -->
+                        <div id="userDropdown" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50">
+                            <div class="px-4 py-3 border-b border-slate-100">
+                                <p class="text-xs font-bold text-slate-800">Mauro Quartin</p>
+                                <p class="text-[11px] text-slate-500 truncate">mauro.quartin@linkedpay.co.ao</p>
+                                <span class="inline-block mt-2 bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Administrador</span>
+                            </div>
+                            <div class="py-1 text-xs text-slate-600">
+                                <a href="#" class="flex items-center gap-2.5 px-4 py-2 hover:bg-slate-50"><i class="fa-regular fa-id-badge text-slate-400"></i> Perfil do Utilizador</a>
+                                <a href="#" class="flex items-center gap-2.5 px-4 py-2 hover:bg-slate-50"><i class="fa-solid fa-sliders text-slate-400"></i> Configurações da Conta</a>
+                                <a href="#" class="flex items-center gap-2.5 px-4 py-2 hover:bg-slate-50"><i class="fa-solid fa-shield-halved text-slate-400"></i> Segurança & API Keys</a>
+                            </div>
+                            <div class="border-t border-slate-100 pt-1">
+                                <a href="#" class="flex items-center gap-2.5 px-4 py-2 text-red-600 hover:bg-red-50 text-xs font-medium"><i class="fa-solid fa-arrow-right-from-bracket"></i> Terminar Sessão</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </header>
+
+            <!-- MAIN CONTENT AREA -->
+            <main class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+                
+                <!-- TAB 1: DASHBOARD VIEW -->
+                <div id="tab-dashboard" class="space-y-6">
+                    
+                    <!-- KPI Cards Summary Row -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
+                            <div class="flex items-center justify-between text-slate-500 text-xs font-semibold mb-2">
+                                <span>Volume Total (90d)</span>
+                                <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-wallet"></i>
+                                </div>
+                            </div>
+                            <div class="text-xl font-extrabold text-slate-800">4,892,450,000 <span class="text-xs font-normal text-slate-500">AOA</span></div>
+                            <div class="mt-2 flex items-center gap-1.5 text-[11px] text-emerald-600 font-semibold">
+                                <i class="fa-solid fa-arrow-trend-up"></i>
+                                <span>+14.2% em relação ao período anterior</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
+                            <div class="flex items-center justify-between text-slate-500 text-xs font-semibold mb-2">
+                                <span>Total Transações</span>
+                                <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                                </div>
+                            </div>
+                            <div class="text-xl font-extrabold text-slate-800">142,850</div>
+                            <div class="mt-2 flex items-center gap-1.5 text-[11px] text-emerald-600 font-semibold">
+                                <i class="fa-solid fa-arrow-trend-up"></i>
+                                <span>+8.7% novas operações</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
+                            <div class="flex items-center justify-between text-slate-500 text-xs font-semibold mb-2">
+                                <span>Ticket Médio</span>
+                                <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-receipt"></i>
+                                </div>
+                            </div>
+                            <div class="text-xl font-extrabold text-slate-800">34,248 <span class="text-xs font-normal text-slate-500">AOA</span></div>
+                            <div class="mt-2 flex items-center gap-1.5 text-[11px] text-emerald-600 font-semibold">
+                                <i class="fa-solid fa-arrow-trend-up"></i>
+                                <span>+2.1% variação positiva</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm hover:shadow-md transition">
+                            <div class="flex items-center justify-between text-slate-500 text-xs font-semibold mb-2">
+                                <span>Taxa de Sucesso</span>
+                                <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                </div>
+                            </div>
+                            <div class="text-xl font-extrabold text-slate-800">99.4%</div>
+                            <div class="mt-2 flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                                <span>SLA de liquidação ativo</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PRIMARY CHART CARD -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <div>
+                                <h3 class="text-base font-bold text-slate-800">Pagamentos por Período de Compensação - Últimos 90 Dias</h3>
+                                <p class="text-xs text-slate-500 mt-0.5">Comparativo de volume de transações (Quantidade) e montante liquidador (Valor em AOA)</p>
+                            </div>
+                            
+                            <!-- Filter Controls -->
+                            <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl text-xs font-semibold self-start sm:self-auto">
+                                <button class="px-3 py-1.5 rounded-lg bg-white shadow-sm text-slate-800 transition">90 Dias</button>
+                                <button class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">30 Dias</button>
+                                <button class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 transition">7 Dias</button>
+                            </div>
+                        </div>
+
+                        <!-- Custom Dual Axis Chart Legend Toggle Bar -->
+                        <div class="flex items-center justify-end gap-6 mb-4 text-xs font-medium">
+                            <div class="flex items-center gap-2 cursor-pointer" onclick="toggleDataset(0)">
+                                <span class="w-3.5 h-3.5 rounded-sm bg-sky-400 inline-block"></span>
+                                <span class="text-slate-600 font-semibold">Quantidade</span>
+                            </div>
+                            <div class="flex items-center gap-2 cursor-pointer" onclick="toggleDataset(1)">
+                                <span class="w-3.5 h-1 bg-slate-900 inline-block rounded-full"></span>
+                                <span class="w-2 h-2 rounded-full bg-slate-900 border border-white inline-block -ml-4"></span>
+                                <span class="text-slate-600 font-semibold">Valor (AOA)</span>
+                            </div>
+                        </div>
+
+                        <!-- Canvas Container -->
+                        <div class="relative w-full h-80 md:h-96">
+                            <canvas id="compensationChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- LOWER GRID ROW CARDS -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        
+                        <!-- Card 1: Distribuição Horária de Pagamentos -->
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-800">Distribuição Horária de Pagamentos - Últimos 90 Dias</h4>
+                                    <p class="text-xs text-slate-500">Picos de tráfego de transação durante o dia</p>
+                                </div>
+                                <div class="text-slate-400 hover:text-slate-600 cursor-pointer text-xs">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </div>
+                            </div>
+                            <div class="relative h-60">
+                                <canvas id="hourlyChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Pagamentos por Tipo de Terminal -->
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-800">Pagamentos por Tipo de Terminal - Últimos 90 Dias</h4>
+                                    <p class="text-xs text-slate-500">Repartição de métodos de pagamento utilizados</p>
+                                </div>
+                                <div class="text-slate-400 hover:text-slate-600 cursor-pointer text-xs">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                                <div class="relative h-56 flex items-center justify-center">
+                                    <canvas id="terminalChart"></canvas>
+                                </div>
+                                <div class="space-y-3 text-xs">
+                                    <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full bg-purple-600"></span>
+                                            <span class="font-medium text-slate-700">Multicaixa Express</span>
+                                        </div>
+                                        <span class="font-bold text-slate-900">58%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+                                            <span class="font-medium text-slate-700">TPA / POS Físico</span>
+                                        </div>
+                                        <span class="font-bold text-slate-900">22%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full bg-sky-400"></span>
+                                            <span class="font-medium text-slate-700">Pagamento QR Code</span>
+                                        </div>
+                                        <span class="font-bold text-slate-900">12%</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-3 h-3 rounded-full bg-indigo-400"></span>
+                                            <span class="font-medium text-slate-700">Web Checkout H5</span>
+                                        </div>
+                                        <span class="font-bold text-slate-900">8%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- TAB 2: REFERÊNCIAS VIEW -->
+                <div id="tab-referencias" class="hidden space-y-6">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <div>
+                                <h3 class="text-base font-bold text-slate-800">Gestão de Referências de Pagamento</h3>
+                                <p class="text-xs text-slate-500">Gere e monitorize referências para a entidade REF 1148</p>
+                            </div>
+                            <button class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-md shadow-purple-500/20 transition">
+                                <i class="fa-solid fa-plus"></i> Gerar Nova Referência
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 font-semibold border-y border-slate-200">
+                                        <th class="p-3">Referência</th>
+                                        <th class="p-3">Entidade</th>
+                                        <th class="p-3">Valor (AOA)</th>
+                                        <th class="p-3">Data Limite</th>
+                                        <th class="p-3">Estado</th>
+                                        <th class="p-3 text-right">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="p-3 font-bold text-purple-700">928 410 882</td>
+                                        <td class="p-3">1148</td>
+                                        <td class="p-3 font-semibold">125,000.00 AOA</td>
+                                        <td class="p-3 text-slate-500">2026-10-15</td>
+                                        <td class="p-3"><span class="bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full text-[10px]">Pago</span></td>
+                                        <td class="p-3 text-right"><button class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-eye"></i></button></td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="p-3 font-bold text-purple-700">928 410 883</td>
+                                        <td class="p-3">1148</td>
+                                        <td class="p-3 font-semibold">45,500.00 AOA</td>
+                                        <td class="p-3 text-slate-500">2026-10-20</td>
+                                        <td class="p-3"><span class="bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full text-[10px]">Pendente</span></td>
+                                        <td class="p-3 text-right"><button class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-eye"></i></button></td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="p-3 font-bold text-purple-700">928 410 884</td>
+                                        <td class="p-3">1148</td>
+                                        <td class="p-3 font-semibold">310,000.00 AOA</td>
+                                        <td class="p-3 text-slate-500">2026-09-30</td>
+                                        <td class="p-3"><span class="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-full text-[10px]">Expirado</span></td>
+                                        <td class="p-3 text-right"><button class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-eye"></i></button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: PAGAMENTOS VIEW -->
+                <div id="tab-pagamentos" class="hidden space-y-6">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+                        <h3 class="text-base font-bold text-slate-800 mb-1">Histórico de Pagamentos Recebidos</h3>
+                        <p class="text-xs text-slate-500 mb-6">Registo em tempo real das transações liquidadas via Multicaixa</p>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 font-semibold border-y border-slate-200">
+                                        <th class="p-3">ID Transação</th>
+                                        <th class="p-3">Data e Hora</th>
+                                        <th class="p-3">Referência</th>
+                                        <th class="p-3">Terminal</th>
+                                        <th class="p-3">Valor (AOA)</th>
+                                        <th class="p-3">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="p-3 font-mono text-slate-500">TX-8849201</td>
+                                        <td class="p-3 text-slate-500">2026-10-06 14:22</td>
+                                        <td class="p-3 font-bold text-slate-800">928 410 882</td>
+                                        <td class="p-3"><span class="bg-purple-50 text-purple-700 px-2 py-0.5 rounded font-semibold text-[11px]">MC Express</span></td>
+                                        <td class="p-3 font-bold text-slate-900">125,000.00 AOA</td>
+                                        <td class="p-3"><span class="bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full text-[10px]">Concluído</span></td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="p-3 font-mono text-slate-500">TX-8849198</td>
+                                        <td class="p-3 text-slate-500">2026-10-06 12:10</td>
+                                        <td class="p-3 font-bold text-slate-800">928 300 119</td>
+                                        <td class="p-3"><span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-semibold text-[11px]">POS ATM</span></td>
+                                        <td class="p-3 font-bold text-slate-900">82,400.00 AOA</td>
+                                        <td class="p-3"><span class="bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full text-[10px]">Concluído</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: PERÍODOS VIEW -->
+                <div id="tab-periodos" class="hidden space-y-6">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+                        <h3 class="text-base font-bold text-slate-800 mb-1">Períodos de Compensação Finanças</h3>
+                        <p class="text-xs text-slate-500 mb-4">Relatórios e lotes de liquidação interbancária (EMIS)</p>
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600">
+                            Período atual de fecho: <strong>8706 (2026-10-04)</strong> com montante acumulado de <strong>120,000,000 AOA</strong>.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: FACTURAS VIEW -->
+                <div id="tab-facturas" class="hidden space-y-6">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+                        <h3 class="text-base font-bold text-slate-800 mb-1">Facturação e Comissões LINKEDPAY</h3>
+                        <p class="text-xs text-slate-500">Facturas mensais de serviços do portal de pagamentos</p>
+                    </div>
+                </div>
+
+                <!-- TAB 6: UTILIZADORES VIEW -->
+                <div id="tab-utilizadores" class="hidden space-y-6">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+                        <h3 class="text-base font-bold text-slate-800 mb-4">Utilizadores com Acesso</h3>
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl text-xs">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-purple-600 text-white font-bold flex items-center justify-center">MQ</div>
+                                <div>
+                                    <p class="font-bold text-slate-800">Mauro Quartin</p>
+                                    <p class="text-slate-500 text-[11px]">mauro.quartin@linkedpay.co.ao</p>
+                                </div>
+                            </div>
+                            <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded font-bold text-[10px]">Super Admin</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 7: FUNÇÕES VIEW -->
+                <div id="tab-funcoes" class="hidden space-y-6">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+                        <h3 class="text-base font-bold text-slate-800 mb-1">Funções & Permissões</h3>
+                        <p class="text-xs text-slate-500">Níveis de acesso de operadores e gestores de conta</p>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const notificationBtn = document.getElementById('notificationBtn');
+        const notificationMenu = document.getElementById('notificationMenu');
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userDropdown = document.getElementById('userDropdown');
+        const sidebar = document.getElementById('sidebar');
+        const openMobileSidebar = document.getElementById('openMobileSidebar');
+        const closeMobileSidebar = document.getElementById('closeMobileSidebar');
+
+        // Toggle Notifications
+        notificationBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notificationMenu.classList.toggle('hidden');
+            userDropdown.classList.add('hidden');
+        });
+
+        // Toggle User Dropdown
+        userMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('hidden');
+            notificationMenu.classList.add('hidden');
+        });
+
+        // Close dropdowns on outside click
+        document.addEventListener('click', () => {
+            notificationMenu.classList.add('hidden');
+            userDropdown.classList.add('hidden');
+        });
+
+        // Mobile Sidebar toggles
+        openMobileSidebar.addEventListener('click', () => {
+            sidebar.classList.remove('-translate-x-full');
+            sidebar.classList.add('fixed', 'inset-y-0', 'left-0', 'z-50', 'shadow-2xl');
+        });
+
+        closeMobileSidebar.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+        });
+
+        // Navigation Switcher function
+        function switchTab(tabId) {
+            const tabs = ['dashboard', 'referencias', 'pagamentos', 'periodos', 'facturas', 'utilizadores', 'funcoes'];
+            
+            tabs.forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                const nav = document.getElementById(`nav-${t}`);
+                if (el) el.classList.add('hidden');
+                if (nav) {
+                    nav.classList.remove('text-purple-700', 'bg-purple-50', 'border-purple-600', 'font-semibold');
+                    nav.classList.add('text-slate-600', 'border-transparent', 'font-medium');
+                }
+            });
+
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            const pageTitle = document.getElementById('pageTitle');
+
+            if (activeTab) activeTab.classList.remove('hidden');
+            if (activeNav) {
+                activeNav.classList.add('text-purple-700', 'bg-purple-50', 'border-purple-600', 'font-semibold');
+                activeNav.classList.remove('text-slate-600', 'border-transparent', 'font-medium');
+            }
+
+            if (pageTitle) {
+                const titles = {
+                    'dashboard': 'Dashboard',
+                    'referencias': 'Referências',
+                    'pagamentos': 'Pagamentos',
+                    'periodos': 'Períodos de Compensação',
+                    'facturas': 'Facturas',
+                    'utilizadores': 'Utilizadores',
+                    'funcoes': 'Funções e Permissões'
+                };
+                pageTitle.textContent = titles[tabId] || 'Dashboard';
+            }
+        }
+
+        // --- CHART DATA GENERATION MATCHING ORIGINAL DASHBOARD PHOTO ---
+        // Generating dates matching image labels 8618 (2026-07-08) to 8706 (2026-10-04)
+        const periodCodes = [
+            '8618 (2026-07-08)', '8622', '8625', '8629 (2026-07-19)', '8633', '8637', 
+            '8640 (2026-07-30)', '8644', '8648', '8651 (2026-08-10)', '8655', '8659', 
+            '8662 (2026-08-21)', '8666', '8670', '8673 (2026-09-01)', '8677', '8681', 
+            '8684 (2026-09-12)', '8688', '8692', '8695 (2026-09-23)', '8699', '8703', '8706 (2026-10-04)'
+        ];
+
+        // Quantidade (Light Cyan Bar) values max ~5500
+        const quantData = [
+            4400, 3200, 3950, 2700, 2200, 4050, 4100, 4350, 3350, 4900, 4400, 3450, 
+            3100, 3150, 3100, 4080, 4350, 4500, 4700, 4200, 3700, 3200, 5250, 4900, 5000
+        ];
+
+        // Valor (AOA Line) values up to ~150,000,000 AOA
+        const valorData = [
+            120000000, 92000000, 108000000, 84000000, 65000000, 81000000, 101000000, 93000000, 39000000, 127000000, 93000000, 91000000, 
+            28000000, 78000000, 95000000, 107000000, 98000000, 121000000, 115000000, 73000000, 29000000, 53000000, 145000000, 120000000, 140000000
+        ];
+
+        let mainChart;
+
+        // Initialize Primary Dual-Axis Chart
+        window.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('compensationChart').getContext('2d');
+            
+            mainChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: periodCodes,
+                    datasets: [
+                        {
+                            label: 'Quantidade',
+                            data: quantData,
+                            backgroundColor: '#67e8f9', // Cyan/Light Turquoise from image
+                            hoverBackgroundColor: '#22d3ee',
+                            borderRadius: 2,
+                            barPercentage: 0.6,
+                            yAxisID: 'yQuant'
+                        },
+                        {
+                            label: 'Valor (AOA)',
+                            data: valorData,
+                            type: 'line',
+                            borderColor: '#0f172a', // Dark line from image
+                            borderWidth: 2,
+                            pointBackgroundColor: '#0f172a',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 1.5,
+                            pointRadius: 3.5,
+                            pointHoverRadius: 6,
+                            tension: 0.15,
+                            yAxisID: 'yValor'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            display: false // Using custom top legend
+                        },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            titleFont: { family: 'Inter', size: 12, weight: 'bold' },
+                            bodyFont: { family: 'Inter', size: 12 },
+                            padding: 12,
+                            cornerRadius: 10,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        if (context.datasetIndex === 1) {
+                                            label += new Intl.NumberFormat('pt-AO').format(context.parsed.y) + ' AOA';
+                                        } else {
+                                            label += new Intl.NumberFormat('pt-AO').format(context.parsed.y);
+                                        }
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { family: 'Inter', size: 9 },
+                                color: '#64748b',
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: 7
+                            }
+                        },
+                        yQuant: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            min: 0,
+                            max: 6000,
+                            ticks: {
+                                stepSize: 1000,
+                                font: { family: 'Inter', size: 10 },
+                                color: '#0284c7'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Quantidade',
+                                color: '#0284c7',
+                                font: { family: 'Inter', size: 11, weight: 'bold' }
+                            },
+                            grid: {
+                                color: '#f1f5f9'
+                            }
+                        },
+                        yValor: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            min: 0,
+                            max: 180000000,
+                            ticks: {
+                                stepSize: 30000000,
+                                font: { family: 'Inter', size: 10 },
+                                color: '#334155',
+                                callback: function(value) {
+                                    return (value / 1000000) + 'M AOA';
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Valor (AOA)',
+                                color: '#334155',
+                                font: { family: 'Inter', size: 11, weight: 'bold' }
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Card 1: Hourly Distribution Bar Chart
+            const hourlyCtx = document.getElementById('hourlyChart').getContext('2d');
+            new Chart(hourlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['00h', '02h', '04h', '06h', '08h', '10h', '12h', '14h', '16h', '18h', '20h', '22h'],
+                    datasets: [{
+                        label: 'Transações',
+                        data: [120, 45, 30, 180, 850, 1420, 1890, 1650, 1510, 1100, 640, 320],
+                        backgroundColor: '#8b5cf6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+                        y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+
+            // Card 2: Terminal Type Doughnut Chart
+            const terminalCtx = document.getElementById('terminalChart').getContext('2d');
+            new Chart(terminalCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Multicaixa Express', 'TPA / POS', 'QR Code', 'Web H5'],
+                    datasets: [{
+                        data: [58, 22, 12, 8],
+                        backgroundColor: ['#7c3aed', '#3b82f6', '#38bdf8', '#818cf8'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    plugins: { legend: { display: false } }
+                }
+            });
+        });
+
+        // Toggle dataset visibility from custom HTML legend
+        function toggleDataset(index) {
+            if (mainChart) {
+                const meta = mainChart.getDatasetMeta(index);
+                meta.hidden = meta.hidden === null ? !mainChart.data.datasets[index].hidden : null;
+                mainChart.update();
+            }
+        }
+    </script>
+</body>
+</html>
